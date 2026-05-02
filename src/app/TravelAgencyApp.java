@@ -1,6 +1,8 @@
 package app;
 
 import common.BusinessException;
+import common.SimpleDB;
+import common.SimpleDatabaseHelper;
 import domain.*;
 
 import java.math.BigDecimal;
@@ -11,6 +13,8 @@ import java.util.Map;
 public class TravelAgencyApp {
     public static void main(String[] args) {
         try {
+            SimpleDB.getConnection();
+
             Customer customer = new Customer(
                     "Анна Ковальски",
                     "anna.kowalski@travel.com",
@@ -59,6 +63,8 @@ public class TravelAgencyApp {
 
             Reservation reservation = new Reservation(customer, travelPlan);
 
+            SimpleDatabaseHelper.saveReservation(reservation);
+
             System.out.println("=== Бронирование создано ===");
             System.out.println(reservation);
             System.out.println("\nИтоговая стоимость: " + reservation.computeTotalCost() + " USD");
@@ -69,6 +75,13 @@ public class TravelAgencyApp {
             reservation.finishReservation();
             System.out.println("Статус после завершения: " + reservation.getCurrentStatus());
             System.out.println("Бонусные баллы клиента: " + customer.getBonusPoints());
+
+            System.out.println("\n=== Все бронирования в БД ===");
+            for (String res : SimpleDatabaseHelper.getAllReservations()) {
+                System.out.println(res);
+            }
+
+            SimpleDB.closeConnection();
 
         } catch (BusinessException e) {
             System.out.println("Ошибка валидации: " + e.getMessage());
